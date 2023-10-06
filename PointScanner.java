@@ -1,13 +1,20 @@
 package edu.iastate.cs228.hw2;
 
+import java.io.File;
+
+
 /**
  * 
- * @author 
+ * @author Vinicius Malaman Soares 
  *
  */
 
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.util.InputMismatchException;
+import java.util.Scanner;
+
 
 
 /**
@@ -38,7 +45,15 @@ public class PointScanner
 	 */
 	public PointScanner(Point[] pts, Algorithm algo) throws IllegalArgumentException
 	{
-		
+		if(pts == null || pts.length == 0) {
+		    throw new IllegalArgumentException();
+		}else {
+		    points = new Point[pts.length];
+		    for(int i = 0;i< pts.length;i++) {
+			points[i] = pts[i];
+		    }
+		    sortingAlgorithm = algo;
+		}
 	}
 
 	
@@ -51,7 +66,33 @@ public class PointScanner
 	 */
 	protected PointScanner(String inputFileName, Algorithm algo) throws FileNotFoundException, InputMismatchException
 	{
-		// TODO
+		sortingAlgorithm = algo;
+		
+		try{
+		    File file = new File(inputFileName);
+		    Scanner scrn = new Scanner(file);
+		    int length = 0;
+		    while(scrn.hasNext()) {
+			scrn.nextInt();
+			length++;
+		    }
+		    scrn.close();
+		    if(length %2 != 0) {
+			throw new InputMismatchException();
+		    }
+		    points = new Point[length/2];
+		    Scanner scrn2 = new Scanner(file);
+		    int i =0;
+		    while(scrn2.hasNext()) {
+			int x = scrn2.nextInt();
+			int y = scrn2.nextInt();
+			points[i] = new Point(x,y);
+			i++;
+		    }
+		    scrn2.close();
+		}catch(FileNotFoundException e) {
+		   throw new FileNotFoundException();
+		}
 	}
 
 	
@@ -65,14 +106,22 @@ public class PointScanner
 	 * Based on the value of sortingAlgorithm, create an object of SelectionSorter, InsertionSorter, MergeSorter,
 	 * or QuickSorter to carry out sorting.       
 	 * @param algo
+	 * @throws FileNotFoundException
 	 * @return
 	 */
-	public void scan()
+	public void scan()throws FileNotFoundException
 	{
 		// TODO  
-		AbstractSorter aSorter; 
+		AbstractSorter aSorter = null; 
+		long start= 0;
+		long end = 0;
+		long totalx = 0;
+		long totaly = 0;
+		int x = 0;
+		int y = 0;
 		
-		// create an object to be referenced by aSorter according to sortingAlgorithm. for each of the two 
+		// create an o\bject to be referenced by aSorter according to sortingAlgorithm. for each of the two 
+		
 		// rounds of sorting, have aSorter do the following: 
 		// 
 		//     a) call setComparator() with an argument 0 or 1. 
@@ -84,6 +133,36 @@ public class PointScanner
 		//     d) set the medianCoordinatePoint reference to the object with the correct coordinates.
 		//
 		//     e) sum up the times spent on the two sorting rounds and set the instance variable scanTime. 
+		
+		if(sortingAlgorithm.equals(Algorithm.SelectionSort)) {
+		    aSorter = new SelectionSorter(points);
+		}else if(sortingAlgorithm.equals(Algorithm.InsertionSort)) {
+		    aSorter = new InsertionSorter(points);
+		}else if(sortingAlgorithm.equals(Algorithm.MergeSort)) {
+		    aSorter = new MergeSorter(points);
+		}if(sortingAlgorithm.equals(Algorithm.QuickSort)) {
+		    aSorter = new QuickSorter(points);
+		}
+		aSorter.setComparator(0);
+		start = System.nanoTime();
+		aSorter.sort();
+		end = System.nanoTime();
+		totalx = end - start;
+		
+		x = aSorter.getMedian().getX();
+		
+		aSorter.setComparator(1);
+		start = System.nanoTime();
+		aSorter.sort();
+		end = System.nanoTime();
+		totaly = end-start;
+		
+		y = aSorter.getMedian().getY();
+		scanTime = totalx +totaly;
+		
+		medianCoordinatePoint = new Point(x,y);
+		writeMCPToFile();
+		
 		
 	}
 	
@@ -101,8 +180,13 @@ public class PointScanner
 	 */
 	public String stats()
 	{
-		return null; 
-		// TODO 
+	    String str ="";
+	    str += sortingAlgorithm.name();
+	    str+="\t";
+	    str+= points.length;
+	    str+= "\t";
+	    str+= scanTime;
+	    return str; 
 	}
 	
 	
@@ -112,9 +196,10 @@ public class PointScanner
 	 */
 	@Override
 	public String toString()
-	{
-		return null; 
-		// TODO
+	{	
+	    	String str ="MCP: ";
+	    	str +="("+medianCoordinatePoint.getX()+","+ medianCoordinatePoint.getY() +")";
+		return str; 
 	}
 
 	
@@ -128,7 +213,11 @@ public class PointScanner
 	 */
 	public void writeMCPToFile() throws FileNotFoundException
 	{
-		// TODO 
+		FileOutputStream output = new FileOutputStream("output"+sortingAlgorithm+".txt");
+		PrintWriter print = new PrintWriter(output);
+		print.println(this);
+		print.close();
+			
 	}	
 
 	
