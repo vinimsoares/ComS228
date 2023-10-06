@@ -8,7 +8,7 @@ import java.util.InputMismatchException;
 
 /**
  *  
- * @author
+ * @author Vinicius Malaman Soares 
  *
  */
 
@@ -21,8 +21,7 @@ import java.util.InputMismatchException;
 public class SelectionSorter extends AbstractSorter
 {
 	// Other private instance variables if you need ...
-    	int[] arrx = new int[points.length];
-	int[] arry = new int[points.length];
+    	
     	
     	
 	
@@ -35,11 +34,8 @@ public class SelectionSorter extends AbstractSorter
 	public SelectionSorter(Point[] pts)  
 	{
 		super(pts);
-		algorithm = "selection sort";
-		for(int i = 0; i< pts.length;i++) {
-		    arrx[i] = pts[i].getX();
-		    arry[i] = pts[i].getY();
-		}
+		algorithm = "selectionSort";
+		
 	}	
 
 	
@@ -49,29 +45,21 @@ public class SelectionSorter extends AbstractSorter
 	 */
 	@Override 
 	public void sort()
-	{
-	    for(int i = 0; i< points.length;i++) {
-		int minIndexX = i;
-		int minIndexY = i;
-		
-		for(int j = i+1; j< points.length;j++) {
-		    if(arrx[minIndexX]> arrx[j]) {
-			minIndexX = j;
+	{	for(int i = 0; i<points.length-1;i++) {
+	    int min = i;
+		for(int j = i+1;j<points.length;j++) {
+		    if(pointComparator.compare(points[j], points[min])<0) {
+		    min = j;
 		    }
-		    if(arry[minIndexY]> arry[j]) {
-			minIndexY = j;
-		    }
-		}
-		 int tempX = arrx[minIndexX];
-		 int tempY = arry[minIndexY];
-		 arrx[minIndexX] = arrx[i];
-		 arrx[i] = tempX;
-		 arry[minIndexY] = arry[i];
-		 arry[i] = tempY;
+	}
+		swap(min,i);
+	    
 		 
-	    }
-	   
+	}
+	
+}
 	   
 		
-	}	
+		
 }
+	
